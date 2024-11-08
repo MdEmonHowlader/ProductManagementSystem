@@ -1,68 +1,91 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Product;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function index(Request $request){
+    public function index(Request $request)
+    {
         $query = Product::query();
-        if($request->has('sort')){
-            $query->orderBy($request->sort, $request->direction ?? 'asc');
-    
-        }
-        if($request->has('search')){
-            $query->where('product_id', 'like', "%{$request->search}%")->orWhere('description','like', "%{$request->search}%");
 
+        if ($request->has('sort')) {
+            $query->orderBy($request->sort, 'asc');
         }
-        $products =$query->paginate(10);
+
+        if ($request->has('search')) {
+            $query->where('product_id', 'like', "%{$request->search}%")
+                ->orWhere('description', 'like', "%{$request->search}%");
+        }
+
+        $products = $query->paginate(10);
+
         return view('products.index', compact('products'));
-
     }
-    public function create() {
+
+    public function create()
+    {
         return view('products.create');
     }
-    public function store(Request $request) {
-        $validated = $request->validate([
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
             'product_id' => 'required|unique:products',
             'name' => 'required',
+            'description' => 'nullable',
             'price' => 'required|numeric',
             'stock' => 'nullable|integer',
-            'image' => 'nullable|string',
+            'image' => 'nullable|image|max:2048',
         ]);
-        Product::create($validated);
-        return redirect('/products')->with('success', 'Product created successfully.');
+    
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('image', 'public');
+        }
+    
+        Product::create($data);
+        return redirect()->route('products.index')->with('success', 'Product created successfully');
     }
+    
 
-    public function show($id) {
-        $product = Product::findOrFail($id);
+    public function show(Product $product)
+    {
         return view('products.show', compact('product'));
     }
-    public function edit($id) {
-        $product = Product::findOrFail($id);
+
+    public function edit(Product $product)
+    {
         return view('products.edit', compact('product'));
     }
-    public function update(Request $request, $id) {
-        $product = Product::findOrFail($id);
+    
 
-        $validated = $request->validate([
+    public function update(Request $request, Product $product)
+    {
+        $data = $request->validate([
             'product_id' => 'required|unique:products,product_id,' . $product->id,
             'name' => 'required',
+            'description' => 'nullable',
             'price' => 'required|numeric',
             'stock' => 'nullable|integer',
-            'image' => 'nullable|string',
+            'image' => 'nullable|image|max:2048',
         ]);
-
-        $product->update($validated);
-        return redirect('/products')->with('success', 'Product updated successfully.');
+    
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('image', 'public');
+        }
+    
+        $product->update($data);
+        return redirect()->route('products.index')->with('success', 'Product updated successfully');
     }
+    
+    
 
-    public function destroy($id) {
-        $product = Product::findOrFail($id);
+    public function destroy(Product $product)
+    {
         $product->delete();
-        return redirect('/products')->with('success', 'Product deleted successfully.');
+        return redirect()->route('products.index')->with('success', 'Product deleted successfully');
     }
-
+    
 }
-

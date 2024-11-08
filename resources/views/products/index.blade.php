@@ -1,32 +1,27 @@
-<!-- resources/views/products/index.blade.php -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Product List</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-<div class="container mt-5">
-    <h1 class="mb-4">Product List</h1>
+
+@extends('products.layouts.app')
+
+@section('content')
+<div class="container">
+    <h1>Product List</h1>
 
     <!-- Search Form -->
-    <form action="{{ url('/products') }}" method="GET" class="mb-3">
-        <div class="input-group">
-            <input type="text" name="search" class="form-control" placeholder="Search by product ID or description" value="{{ request('search') }}">
-            <button class="btn btn-primary" type="submit">Search</button>
-        </div>
+    <div class="mb-3">
+        <a href="{{ url('/products/create') }}" class="btn btn-success">Add New Product</a>
+    </div>
+    <form action="{{ route('products.index') }}" method="GET" class="form-inline mb-4">
+        <input type="text" name="search" class="form-control mr-2" placeholder="Search by ID or Description" value="{{ request('search') }}">
+        <button type="submit" class="btn btn-primary">Search</button>
     </form>
 
     <!-- Sorting Links -->
     <div class="mb-3">
-        <a href="{{ url('/products?sort=name&direction=asc') }}" class="btn btn-link">Sort by Name (Asc)</a>
-        <a href="{{ url('/products?sort=name&direction=desc') }}" class="btn btn-link">Sort by Name (Desc)</a>
-        <a href="{{ url('/products?sort=price&direction=asc') }}" class="btn btn-link">Sort by Price (Asc)</a>
-        <a href="{{ url('/products?sort=price&direction=desc') }}" class="btn btn-link">Sort by Price (Desc)</a>
+        <a href="{{ route('products.index', ['sort' => 'name']) }}" class="btn btn-link">
+            <span class="border border-5">Sort by Name</span></a>
+        <a href="{{ route('products.index', ['sort' => 'price']) }}" class="btn btn-link"><span class="border border-5">Sort by Price</span></a>
     </div>
 
-    <!-- Product Table -->
+    <!-- Products Table -->
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -35,27 +30,35 @@
                 <th>Description</th>
                 <th>Price</th>
                 <th>Stock</th>
+                <th>Image</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             @foreach($products as $product)
-                <tr>
-                    <td>{{ $product->product_id }}</td>
-                    <td>{{ $product->name }}</td>
-                    <td>{{ $product->description }}</td>
-                    <td>${{ $product->price }}</td>
-                    <td>{{ $product->stock }}</td>
-                    <td>
-                        <a href="{{ url('/products/' . $product->id) }}" class="btn btn-info btn-sm">View</a>
-                        <a href="{{ url('/products/' . $product->id . '/edit') }}" class="btn btn-warning btn-sm">Edit</a>
-                        <form action="{{ url('/products/' . $product->id) }}" method="POST" class="d-inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                        </form>
-                    </td>
-                </tr>
+            <tr>
+                <td>{{ $product->product_id }}</td>
+                <td>{{ $product->name }}</td>
+                <td>{{ $product->description }}</td>
+                <td>${{ number_format($product->price, 2) }}</td>
+                <td>{{ $product->stock }}</td>
+                <td>
+                    @if($product->image)
+                        <img src="{{ asset('storage/' . $product->image) }}" alt="Product Image" width="50" height="50">
+                    @else
+                        <span>No Image</span>
+                    @endif
+                </td>
+                <td>
+                    <a href="{{ route('products.show', $product->id) }}" class="btn btn-info btn-sm">View</a>
+                    <a href="{{ route('products.edit', $product->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                    <form action="{{ route('products.destroy', $product->id) }}" method="POST" style="display: inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                </td>
+            </tr>
             @endforeach
         </tbody>
     </table>
@@ -65,5 +68,4 @@
         {{ $products->links() }}
     </div>
 </div>
-</body>
-</html>
+@endsection

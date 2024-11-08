@@ -1,25 +1,26 @@
-<!-- resources/views/products/show.blade.php -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>View Product</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-<div class="container mt-5">
-    <h1 class="mb-4">Product Details</h1>
+
+@extends('products.layouts.app')
+
+@section('content')
+<div class="container">
+    <h1>Product Details</h1>
 
     <div class="card">
+        <div class="card-header">{{ $product->name }}</div>
         <div class="card-body">
-            <h5 class="card-title">Product ID: {{ $product->product_id }}</h5>
-            <p class="card-text"><strong>Name:</strong> {{ $product->name }}</p>
-            <p class="card-text"><strong>Description:</strong> {{ $product->description }}</p>
-            <p class="card-text"><strong>Price:</strong> ${{ $product->price }}</p>
-            <p class="card-text"><strong>Stock:</strong> {{ $product->stock }}</p>
-            <a href="{{ url('/products') }}" class="btn btn-primary mt-3">Back to Product List</a>
+            <p><strong>Product ID:</strong> {{ $product->product_id }}</p>
+            <p><strong>Description:</strong> {{ $product->description }}</p>
+            <p><strong>Price:</strong> ${{ number_format($product->price, 2) }}</p>
+            <p><strong>Stock:</strong> {{ $product->stock }}</p>
+            @if($product->image)
+            <p><strong>Image:</strong></p>
+            <img src="{{ asset('storage/' . $product->image) }}" alt="Product Image" width="200">
+            @endif
         </div>
     </div>
+
+    <div class="mt-3">
+        <a href="{{ route('products.index') }}" class="btn btn-secondary">Back to List</a>
+    </div>
 </div>
-</body>
-</html>
+@endsection
