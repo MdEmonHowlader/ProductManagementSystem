@@ -6,7 +6,7 @@
 <div class="container">
     <h1>Edit Product</h1>
 
-    <form action="{{ route('products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('products.update',$product->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
 
@@ -40,7 +40,7 @@
             <input type="file" class="form-control-file" id="image" name="image">
             @if($product->image)
             <div class="mt-2">
-                <img src="{{ asset('public/image/' . $product->image) }}" alt="Product Image" width="100">
+                <img src="{{ asset('storage/' . $product->image) }}" alt="Product Image" width="100">
             </div>
             @endif
         </div>

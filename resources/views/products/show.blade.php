@@ -12,10 +12,17 @@
             <p><strong>Description:</strong> {{ $product->description }}</p>
             <p><strong>Price:</strong> ${{ number_format($product->price, 2) }}</p>
             <p><strong>Stock:</strong> {{ $product->stock }}</p>
-            @if($product->image)
+            {{-- @if($product->image)
             <p><strong>Image:</strong></p>
             <img src="{{ asset('storage/' . $product->image) }}" alt="Product Image" width="200">
-            @endif
+            @endif --}}
+            <img
+            src="{{ $product->image ? asset('storage/' . $product->image) : asset('images/placeholder.png') }}"
+            alt="Image of {{ $product->name }}"
+            class="w-48 h-48 object-cover rounded-md mr-6"
+        />
+        
+
         </div>
     </div>
 

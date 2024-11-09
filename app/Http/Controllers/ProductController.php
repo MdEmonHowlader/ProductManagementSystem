@@ -32,60 +32,80 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate([
+       
+
+        $request->validate([
             'product_id' => 'required|unique:products',
             'name' => 'required',
-            'description' => 'nullable',
             'price' => 'required|numeric',
-            'stock' => 'nullable|integer',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
-    
-        if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('image', 'public');
-        }
-    
-        Product::create($data);
-        return redirect()->route('products.index')->with('success', 'Product created successfully');
-    }
-    
 
-    public function show(Product $product)
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('products', 'public');
+        }
+
+        Product::create([
+            'product_id' => $request->product_id,
+            'name' => $request->name,
+            'description' => $request->description,
+            'price' => $request->price,
+            'stock' => $request->stock,
+            'image' => $imagePath,
+        ]);
+
+        return redirect()->route('products.index')->with('success', 'Product created successfully!');
+
+    }
+
+    public function show($id)
     {
+        $product = Product::findOrFail($id);
         return view('products.show', compact('product'));
     }
 
-    public function edit(Product $product)
+    public function edit($id)
     {
+        $product = Product::findOrFail($id);
         return view('products.edit', compact('product'));
     }
-    
 
-    public function update(Request $request, Product $product)
+    public function update(Request $request, $id)
     {
+        $product = Product::findOrFail($id);
         $data = $request->validate([
-            'product_id' => 'required|unique:products,product_id,' . $product->id,
+            'product_id' => 'required|unique:products,product_id,'.$product->id,
             'name' => 'required',
             'description' => 'nullable',
             'price' => 'required|numeric',
             'stock' => 'nullable|integer',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
-    
+        $imagePath = $product->image;
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('image', 'public');
+            if ($imagePath) {
+                Storage::delete('public/'.$imagePath);
+            }
+            $imagePath = $request->file('image')->store('products', 'public');
         }
-    
-        $product->update($data);
-        return redirect()->route('products.index')->with('success', 'Product updated successfully');
-    }
-    
-    
+        $product->update([
+            'product_id' => $request->product_id,
+            'name' => $request->name,
+            'description' => $request->description,
+            'price' => $request->price,
+            'stock' => $request->stock,
+            'image' => $imagePath,
+        ]);
 
-    public function destroy(Product $product)
+        return redirect()->route('products.index')->with('success', 'Product updated successfully!');
+    }
+
+    public function destroy($id)
     {
+        $product = Product::findOrFail($id);
         $product->delete();
+
         return redirect()->route('products.index')->with('success', 'Product deleted successfully');
     }
-    
 }

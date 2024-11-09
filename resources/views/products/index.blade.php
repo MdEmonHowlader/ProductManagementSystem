@@ -44,7 +44,8 @@
                 <td>{{ $product->stock }}</td>
                 <td>
                     @if($product->image)
-                        <img src="{{ asset('storage/' . $product->image) }}" alt="Product Image" width="50" height="50">
+                        <img src="{{ asset('storage/' . $product->image) }}" alt="Product Image" class="w-full h-auto
+                        max-w-[250px] object-contain rounded-md"/>
                     @else
                         <span>No Image</span>
                     @endif
